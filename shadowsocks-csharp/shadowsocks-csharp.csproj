@@ -98,6 +98,9 @@
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
+    <None Include="libsscrypto.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="shadowsocks.ico" />
   </ItemGroup>
   <ItemGroup>
