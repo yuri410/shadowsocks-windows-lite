@@ -1,7 +1,11 @@
 Shadowsocks for Windows - Lite
 =======================
 
-Commandline client with multiple server connections
+Bare minimum Shadowsocks commandline client with multiple servers, each has a listening port for sock5 connection, suitable for a server in LAN. All other features from shadowsocks-windows were removed.
+
+To install as a Windows service, use a wrapper like [winsw].
+
+To access one port as a http proxy, use privoxy similar to the way shadowsocks-windows did. Sample config included in "service".
 
 #### Server Configuration
 
@@ -52,4 +56,4 @@ Visual Studio 2015 is required.
 
 GPLv3
 
-
+[winsw]:	https://github.com/kohsuke/winsw
