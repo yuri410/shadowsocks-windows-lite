@@ -12,11 +12,6 @@ namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
-        // controller:
-        // handle user actions
-        // manipulates UI
-        // interacts with low level logic
-
         private Thread _ramThread;
 
         private List<Listener> _listeners = new List<Listener>();
@@ -139,7 +134,6 @@ namespace Shadowsocks.Controller
         public void SaveServers(List<ServerInfo> servers, int localPort)
         {
             _config.configs = servers;
-            //_config.localPort = localPort;
             SaveConfig(_config);
         }
 
@@ -149,7 +143,6 @@ namespace Shadowsocks.Controller
             {
                 var server = new ServerInfo(ssURL);
                 _config.configs.Add(server);
-                //_config.index = _config.configs.Count - 1;
                 SaveConfig(_config);
                 return true;
             }

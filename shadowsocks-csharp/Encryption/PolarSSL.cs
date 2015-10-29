@@ -20,24 +20,7 @@ namespace Shadowsocks.Encryption
         {
             if (!File.Exists("libsscrypto.dll"))
                 throw new FileNotFoundException("libsscrypto.dll");
-            //string tempPath = Utils.GetTempPath();
-            //string dllPath = "libsscrypto.dll";
-            //try
-            //{
-            //    FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
-            //}
-            //catch (IOException)
-            //{
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e.ToString());
-            //}
-            //LoadLibrary(dllPath);
         }
-
-        [DllImport("Kernel32.dll")]
-        private static extern IntPtr LoadLibrary(string path);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static void aes_init(IntPtr ctx);
