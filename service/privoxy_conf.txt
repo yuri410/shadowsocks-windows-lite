@@ -1,4 +1,4 @@
-﻿listen-address 0.0.0.0:8123
+listen-address 0.0.0.0:8123
 show-on-task-bar 0
 activity-animation 0
 forward-socks5 / 127.0.0.1:1080 .
