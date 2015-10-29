@@ -1,4 +1,5 @@
 ﻿using Shadowsocks.Model;
+using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -21,8 +22,7 @@ namespace Shadowsocks.Controller
             public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
         }
 
-        Configuration _config;
-        bool _shareOverLAN;
+        ServerInfo _target;
         Socket _tcpSocket;
         Socket _udpSocket;
         IList<Service> _services;
@@ -32,28 +32,14 @@ namespace Shadowsocks.Controller
             this._services = services;
         }
 
-        private bool CheckIfPortInUse(int port)
+        
+
+        public void Start(ServerInfo target)
         {
-            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-            IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
+            this._target = target;
 
-            foreach (IPEndPoint endPoint in ipEndPoints)
-            {
-                if (endPoint.Port == port)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void Start(Configuration config)
-        {
-            this._config = config;
-            this._shareOverLAN = config.shareOverLan;
-
-            if (CheckIfPortInUse(_config.localPort))
-                throw new Exception(I18N.GetString("Port already in use"));
+            if (Utils.CheckIfPortInUse(_target.local_port))
+                throw new Exception("Port already in use");
 
             try
             {
@@ -63,13 +49,13 @@ namespace Shadowsocks.Controller
                 _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 IPEndPoint localEndPoint = null;
-                if (_shareOverLAN)
+                if (target.shareOverLan)
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, _config.localPort);
+                    localEndPoint = new IPEndPoint(IPAddress.Any, _target.local_port);
                 }
                 else
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _config.localPort);
+                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _target.local_port);
                 }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
@@ -78,7 +64,7 @@ namespace Shadowsocks.Controller
                 _tcpSocket.Listen(1024);
 
                 // Start an asynchronous socket to listen for connections.
-                Console.WriteLine("Shadowsocks started");
+                Console.WriteLine("Shadowsocks service started " + target.FriendlyName() + " at port: " + _target.local_port.ToString());
                 _tcpSocket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     _tcpSocket);

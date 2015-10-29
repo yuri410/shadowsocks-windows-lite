@@ -1,5 +1,4 @@
 ﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
@@ -19,20 +18,22 @@ namespace Shadowsocks.Encryption
 
         static PolarSSL()
         {
-            string tempPath = Utils.GetTempPath();
-            string dllPath = tempPath + "/libsscrypto.dll";
-            try
-            {
-                FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
-            }
-            catch (IOException)
-            {
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            LoadLibrary(dllPath);
+            if (!File.Exists("libsscrypto.dll"))
+                throw new FileNotFoundException("libsscrypto.dll");
+            //string tempPath = Utils.GetTempPath();
+            //string dllPath = "libsscrypto.dll";
+            //try
+            //{
+            //    FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
+            //}
+            //catch (IOException)
+            //{
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.ToString());
+            //}
+            //LoadLibrary(dllPath);
         }
 
         [DllImport("Kernel32.dll")]

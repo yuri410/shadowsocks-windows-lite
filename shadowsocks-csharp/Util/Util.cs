@@ -5,28 +5,26 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
+using System.Net.NetworkInformation;
+using System.Net;
 
 namespace Shadowsocks.Util
 {
     public class Utils
     {
-        // return path to store temporary files
-        public static string GetTempPath()
+        public static bool CheckIfPortInUse(int port)
         {
-            if (File.Exists(Application.StartupPath + "\\shadowsocks_portable_mode.txt"))
+            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
+
+            foreach (IPEndPoint endPoint in ipEndPoints)
             {
-                try
+                if (endPoint.Port == port)
                 {
-                    Directory.CreateDirectory(Application.StartupPath + "\\temp");
-                } catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    return true;
                 }
-                // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
-                return Application.StartupPath + "\\temp";
             }
-            return Path.GetTempPath();
+            return false;
         }
 
         public static void ReleaseMemory(bool removePages)

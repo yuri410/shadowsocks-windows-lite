@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Net;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
-using Shadowsocks.Controller.Strategy;
 using System.Timers;
 
 namespace Shadowsocks.Controller
@@ -13,17 +12,17 @@ namespace Shadowsocks.Controller
 
     class TCPRelay : Listener.Service
     {
-        private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
+        private ServerInfo _serverInfo;
 
         public ISet<Handler> Handlers
         {
             get; set;
         }
 
-        public TCPRelay(ShadowsocksController controller)
+        public TCPRelay(ServerInfo si)
         {
-            this._controller = controller;
+            this._serverInfo = si;
             this.Handlers = new HashSet<Handler>();
             this._lastSweepTime = DateTime.Now;
         }
@@ -41,8 +40,8 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
             handler.connection = socket;
-            handler.controller = _controller;
             handler.relay = this;
+            handler.server = _serverInfo;
 
             handler.Start(firstPacket, length);
             IList<Handler> handlersToClose = new List<Handler>();
@@ -76,11 +75,10 @@ namespace Shadowsocks.Controller
     {
         //public Encryptor encryptor;
         public IEncryptor encryptor;
-        public Server server;
+        public ServerInfo server;
         // Client  socket.
         public Socket remote;
         public Socket connection;
-        public ShadowsocksController controller;
         public TCPRelay relay;
 
         public DateTime lastActivity;
@@ -119,13 +117,13 @@ namespace Shadowsocks.Controller
 
         public void CreateRemote()
         {
-            Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            //ServerInfo server = controller.GetAServer((IPEndPoint)connection.RemoteEndPoint);
+            
             if (server == null || server.server == "")
             {
                 throw new ArgumentException("No server configured");
             }
             this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
-            this.server = server;
         }
 
         public void Start(byte[] firstPacket, int length)
@@ -365,7 +363,7 @@ namespace Shadowsocks.Controller
 
         private class ServerTimer : Timer
         {
-            public Server Server;
+            public ServerInfo Server;
 
             public ServerTimer(int p) :base(p)
             {
@@ -417,12 +415,12 @@ namespace Shadowsocks.Controller
             {
                 return;
             }
-            Server server = ((ServerTimer)sender).Server;
-            IStrategy strategy = controller.GetCurrentStrategy();
-            if (strategy != null)
-            {
-                strategy.SetFailure(server);
-            }
+            ServerInfo server = ((ServerTimer)sender).Server;
+            //IStrategy strategy = controller.GetCurrentStrategy();
+            //if (strategy != null)
+            //{
+            //    strategy.SetFailure(server);
+            //}
             Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
             remote.Close();
             RetryConnect();
@@ -444,7 +442,7 @@ namespace Shadowsocks.Controller
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            Server server = null;
+            ServerInfo server = null;
             if (closed)
             {
                 return;
@@ -465,12 +463,12 @@ namespace Shadowsocks.Controller
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
 
-                var latency = DateTime.Now - _startConnectTime;
-                IStrategy strategy = controller.GetCurrentStrategy();
-                if (strategy != null)
-                {
-                    strategy.UpdateLatency(server, latency);
-                }
+                //var latency = DateTime.Now - _startConnectTime;
+                //IStrategy strategy = controller.GetCurrentStrategy();
+                //if (strategy != null)
+                //{
+                //    strategy.UpdateLatency(server, latency);
+                //}
 
                 StartPipe();
             }
@@ -479,14 +477,14 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                if (server != null)
-                {
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.SetFailure(server);
-                    }
-                }
+               // if (server != null)
+                //{
+                    //IStrategy strategy = controller.GetCurrentStrategy();
+                    //if (strategy != null)
+                    //{
+                    //    strategy.SetFailure(server);
+                    //}
+                //}
                 Logging.LogUsefulException(e);
                 RetryConnect();
             }
@@ -537,11 +535,11 @@ namespace Shadowsocks.Controller
                     }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastRead(this.server);
-                    }
+                    //IStrategy strategy = controller.GetCurrentStrategy();
+                    //if (strategy != null)
+                    //{
+                    //    strategy.UpdateLastRead(this.server);
+                    //}
                 }
                 else
                 {
@@ -589,11 +587,11 @@ namespace Shadowsocks.Controller
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastWrite(this.server);
-                    }
+                    //IStrategy strategy = controller.GetCurrentStrategy();
+                    //if (strategy != null)
+                    //{
+                    //    strategy.UpdateLastWrite(this.server);
+                    //}
                 }
                 else
                 {

@@ -3,42 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 
 namespace Shadowsocks.Model
 {
     [Serializable]
     public class Configuration
     {
-        public List<Server> configs;
-
-        // when strategy is set, index is ignored
-        public string strategy;
-        public int index;
-        public bool global;
-        public bool enabled;
-        public bool shareOverLan;
-        public bool isDefault;
-        public int localPort;
-        public string pacUrl;
-        public bool useOnlinePac;
-        public bool availabilityStatistics;
-
-        private static string CONFIG_FILE = "gui-config.json";
-
-        public Server GetCurrentServer()
-        {
-            if (index >= 0 && index < configs.Count)
-            {
-                return configs[index];
-            }
-            else
-            {
-                return GetDefaultServer();
-            }
-        }
-
-        public static void CheckServer(Server server)
+        public List<ServerInfo> configs = new List<ServerInfo>();
+        
+        private static string CONFIG_FILE = "configs.json";
+        
+        public static void CheckServer(ServerInfo server)
         {
             CheckPort(server.server_port);
             CheckPassword(server.password);
@@ -51,57 +27,17 @@ namespace Shadowsocks.Model
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
-                config.isDefault = false;
-                if (config.localPort == 0)
-                {
-                    config.localPort = 1080;
-                }
-                if (config.index == -1)
-                {
-                    if (config.strategy == null)
-                    {
-                        config.index = 0;
-                    }
-                }
+               
                 return config;
             }
-            catch (Exception e)
+            catch (Exception )
             {
-                if (!(e is FileNotFoundException))
-                {
-                    Console.WriteLine(e);
-                }
-                return new Configuration
-                {
-                    index = 0,
-                    isDefault = true,
-                    localPort = 1080,
-                    configs = new List<Server>()
-                    {
-                        GetDefaultServer()
-                    }
-                };
             }
+            return new Configuration();
         }
 
         public static void Save(Configuration config)
         {
-            if (config.index >= config.configs.Count)
-            {
-                config.index = config.configs.Count - 1;
-            }
-            if (config.index < -1)
-            {
-                config.index = -1;
-            }
-            if (config.index == -1)
-            {
-                if (config.strategy == null)
-                {
-                    config.index = 0;
-                }
-            }
-            config.isDefault = false;
             try
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
@@ -117,16 +53,16 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static Server GetDefaultServer()
+        public static ServerInfo GetDefaultServer()
         {
-            return new Server();
+            return new ServerInfo();
         }
 
         private static void Assert(bool condition)
         {
             if (!condition)
             {
-                throw new Exception(I18N.GetString("assertion failure"));
+                throw new Exception("assertion failure");
             }
         }
 
@@ -134,7 +70,7 @@ namespace Shadowsocks.Model
         {
             if (port <= 0 || port > 65535)
             {
-                throw new ArgumentException(I18N.GetString("Port out of range"));
+                throw new ArgumentException("Port out of range");
             }
         }
 
@@ -143,7 +79,7 @@ namespace Shadowsocks.Model
             CheckPort(port);
             if (port == 8123)
             {
-                throw new ArgumentException(I18N.GetString("Port can't be 8123"));
+                throw new ArgumentException("Port can't be 8123");
             }
         }
 
@@ -151,7 +87,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(password))
             {
-                throw new ArgumentException(I18N.GetString("Password can not be blank"));
+                throw new ArgumentException("Password can not be blank");
             }
         }
 
@@ -159,7 +95,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(server))
             {
-                throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
+                throw new ArgumentException("Server IP can not be blank");
             }
         }
 

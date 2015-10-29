@@ -76,7 +76,7 @@ namespace Shadowsocks.View
                 {
                     return true;
                 }
-                Server server = new Server
+                ServerInfo server = new ServerInfo
                 {
                     server = IPTextBox.Text,
                     server_port = int.Parse(ServerPortTextBox.Text),
@@ -107,7 +107,7 @@ namespace Shadowsocks.View
         {
             if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                Server server = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
+                ServerInfo server = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
@@ -121,7 +121,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration(Configuration configuration)
         {
             ServersListBox.Items.Clear();
-            foreach (Server server in _modifiedConfiguration.configs)
+            foreach (ServerInfo server in _modifiedConfiguration.configs)
             {
                 ServersListBox.Items.Add(server.FriendlyName());
             }
@@ -152,7 +152,7 @@ namespace Shadowsocks.View
 
             if (e.KeyCode == Keys.Enter)
             {
-                Server server = controller.GetCurrentServer();
+                ServerInfo server = controller.GetCurrentServer();
                 if (!SaveOldSelectedServer())
                 {
                     return;
@@ -197,7 +197,7 @@ namespace Shadowsocks.View
             {
                 return;
             }
-            Server server = Configuration.GetDefaultServer();
+            ServerInfo server = Configuration.GetDefaultServer();
             _modifiedConfiguration.configs.Add(server);
             LoadConfiguration(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
@@ -224,7 +224,7 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            Server server = controller.GetCurrentServer();
+            ServerInfo server = controller.GetCurrentServer();
             if (!SaveOldSelectedServer())
             {
                 return;
@@ -257,7 +257,7 @@ namespace Shadowsocks.View
         private void MoveConfigItem(int step)
         {
             int index = ServersListBox.SelectedIndex;
-            Server server = _modifiedConfiguration.configs[index];
+            ServerInfo server = _modifiedConfiguration.configs[index];
             object item = ServersListBox.SelectedItem;
 
             _modifiedConfiguration.configs.Remove(server);
